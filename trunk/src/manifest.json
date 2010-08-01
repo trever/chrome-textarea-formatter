@@ -1,0 +1,12 @@
+{
+	"name": "Textarea Code Formatter",
+	"description": "Gives textareas basic code formatting abilities found in modern IDE.",
+	"content_scripts": [ {
+		"js": [ "jquery.js", "script.js" ],
+		"matches": [ "http://*/*", "https://*/*" ]
+	} ],
+	"version": "@version.number@",
+	"background_page": "background.html",
+	"options_page": "options.html",
+	"permissions": [ "tabs" ]
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="Chrome Textarea Code Formatter Extension" default="build.dist" basedir=".">
+
+    <target name="clean" depends="-load.properties">
+        <delete dir="${build.dir}" quiet="true"/>
+    </target>
+
+    <target name="-load.properties">
+        <property file="build.properties"/>
+    </target>
+
+    <target name="-init" depends="-load.properties,clean">
+        <mkdir dir="${build.dir}"/>
+    	<mkdir dir="${build.dir}/${project.name}"/>
+    </target>
+	
+	<target name="js.minify">
+	    <apply executable="java" parallel="false">
+	    	<fileset dir="${project.src}" includes="**/*.js"/>
+	        <arg line="-jar"/>
+	        <arg path="${build.lib}/yuicompressor-2.4.2.jar"/>
+	        <srcfile/>
+	        <arg line="-o"/>
+	        <mapper type="glob" from="*" to="${build.dir}/${project.name}/*"/>
+	        <targetfile/>
+	    </apply>
+	</target>
+
+	<target name="html.minify">
+	    <apply executable="java" parallel="false">
+	    	<fileset dir="${project.src}" includes="**/*.html"/>
+	        <arg line="-jar"/>
+	        <arg path="${build.lib}/htmlcompressor-0.9.1.jar"/>
+	    	<arg value="--remove-intertag-spaces"/>
+	    	<arg value="--compress-js"/>
+	    	<arg value="--compress-css"/>
+	        <srcfile/>
+	        <arg line="-o"/>
+	        <mapper type="glob" from="*" to="${build.dir}/${project.name}/*"/>
+	        <targetfile/>
+	    </apply>
+	</target>
+
+    <target name="build.dist" depends="-init,js.minify,html.minify">
+    	
+    	<filter filtersfile="build.properties" />
+    	<copy file="${project.src}/manifest.json" tofile="${build.dir}/${project.name}/manifest.json" filtering="true" />
+    	
+    	<copy todir="${build.dir}/${project.name}">
+        	<fileset dir="${project.lib}" includes="**/*"/>
+        </copy>
+    	
+        <zip destfile="${build.dir}/${dist.package.name}.zip"
+             basedir="${build.dir}/${project.name}"
+             includes="**/*"/>
+		
+    </target>
+
+</project>

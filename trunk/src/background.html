@@ -1,0 +1,20 @@
+<html>
+<head>
+	<script>
+		chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+			if(request == "options") {
+				var tabFiller = "	";
+				if(localStorage["tab_filler"] == "space") {
+					var space_cnt = localStorage["space_cnt"]!= null ? parseInt(localStorage["space_cnt"],10) : 4;
+					tabFiller = "";
+					for(var i=0;i<space_cnt;i++) {
+						tabFiller += " ";
+					}
+				}
+				sendResponse({'tab_filler': tabFiller});
+			}
+		});
+	</script>
+</head>
+<body></body>
+</html>

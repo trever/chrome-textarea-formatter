@@ -1,0 +1,64 @@
+<html>
+<head><title>Textarea Code Formatter Options</title>
+	<style>
+		body{background-color:#ebeff9;font-family:arial,sans-serif;font-size:13px;}
+		#form_container {width:300px;margin:20px auto;padding:30px;background:#fff;border-color:#b5c7de;border-style:solid;border-width:4px;-webkit-border-radius:12px;}
+		h2 {padding:0;margin:0 0 10px 0;text-align:center;font-size:18px;}
+		fieldset {border:1px dashed #b5c7de;}
+	</style>
+	<script type="text/javascript">
+		function saveOptions() {
+			
+			var space_cnt = document.getElementById("space_cnt").value;
+			if(space_cnt.length == 0 || space_cnt == "0" || !space_cnt.match(/^\d+$/)) {
+				alert("Please enter positive numeric value");
+				document.getElementById("space_cnt").focus();
+				return false;
+			}
+			
+			var fillerRadioGroup = document.options_form.tab_filler;
+			for(var i=0; i<fillerRadioGroup.length;i++) {
+				if(fillerRadioGroup[i].checked) {
+					localStorage["tab_filler"] = fillerRadioGroup[i].value;
+				}
+			}
+			localStorage["space_cnt"] = space_cnt;
+		}
+		
+		function loadOptions() {
+			var tab_filler = localStorage["tab_filler"];
+			var space_cnt = localStorage["space_cnt"];
+			
+			if(tab_filler == "space") {
+				document.getElementById("tab_filler_space").checked = true;
+			} else {
+				document.getElementById("tab_filler_tab").checked = true;
+			}
+			
+			if(space_cnt != null) {
+				document.getElementById("space_cnt").value = space_cnt;
+			}
+		  
+		}
+	
+	</script>
+</head>
+<body onload="loadOptions()">
+	<div id="form_container">
+		<h2>Textarea Code Formatter Options</h2>
+		<form name="options_form">
+			<fieldset>
+				<legend>When Tab key pressed insert:</legend>
+				<input type="radio" name="tab_filler" value="tab" id="tab_filler_tab" checked>
+				<label for="tab_filler_tab">Tab</label><br>
+				
+				<input type="radio" name="tab_filler" value="space" id="tab_filler_space">
+				<label for="tab_filler_space"> <input type="text" maxlength="2" name="space_cnt" id="space_cnt" value="4" style="width:30px;"/> spaces</label><br>
+			</fieldset>
+			<br/>
+			<input type="button" value="Save" onclick="saveOptions()"/>
+			<input type="reset" value="Reset"/>
+		</form>
+	</div>
+</body>
+</html>
