@@ -48,6 +48,7 @@
     	
     	<copy todir="${build.dir}/${project.name}">
         	<fileset dir="${project.lib}" includes="**/*"/>
+        	<fileset dir="${project.images}" includes="**/*"/>
         </copy>
     	
         <zip destfile="${build.dir}/${dist.package.name}.zip"

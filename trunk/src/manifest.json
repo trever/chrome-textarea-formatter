@@ -5,6 +5,10 @@
 		"js": [ "jquery.js", "script.js" ],
 		"matches": [ "http://*/*", "https://*/*" ]
 	} ],
+	"icons": {
+		"128": "icon128.png",
+		"48": "icon48.png"
+	},
 	"version": "@version.number@",
 	"background_page": "background.html",
 	"options_page": "options.html",
