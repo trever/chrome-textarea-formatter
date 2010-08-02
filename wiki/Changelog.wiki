@@ -1,0 +1,6 @@
+*0.2*
+  * Added address bar icon that lets enable/disable extension
+  * Added option to change default extension state (enabled or disabled)
+
+*0.1*
+  * Initial release
