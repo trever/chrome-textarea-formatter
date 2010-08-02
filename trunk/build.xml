@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<project name="Chrome Textarea Code Formatter Extension" default="build.dist" basedir=".">
+<project name="Chrome Textarea Code Formatter Extension" default="build.dev" basedir=".">
 
     <target name="clean" depends="-load.properties">
         <delete dir="${build.dir}" quiet="true"/>
@@ -55,6 +55,20 @@
              basedir="${build.dir}/${project.name}"
              includes="**/*"/>
 		
+    </target>
+	
+	<target name="build.dev" depends="-init">
+	    	
+    	<filter filtersfile="build.properties" />
+    	<copy file="${project.src}/manifest.json" tofile="${build.dir}/${project.name}/manifest.json" filtering="true" />
+    	
+    	<copy todir="${build.dir}/${project.name}">
+        	<fileset dir="${project.src}" includes="**/*.js"/>
+        	<fileset dir="${project.src}" includes="**/*.html"/>
+        	<fileset dir="${project.lib}" includes="**/*"/>
+        	<fileset dir="${project.images}" includes="**/*"/>
+        </copy>
+    	
     </target>
 
 </project>
