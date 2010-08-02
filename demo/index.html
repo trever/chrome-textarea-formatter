@@ -1,12 +1,30 @@
 <html>
 	<head>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 	</head>
 	<body>
+		<form>
 		<textarea rows="10" cols="50">$(document).ready(function(){
     $("a").click(function(event){
         alert("Thanks for visiting!");
     });
 });</textarea>
+</form>
 	
+<script>
+	function addTa() {
+		
+		$("body").append('<textarea rows="10" cols="70"></textarea>');
+	}
+</script>	
+	<input type="button" value="add" onclick="addTa()"/>
+
+<script>
+	$(document).ready(function(){
+		
+	})
+	
+</script>
+
 	</body>
 </html>

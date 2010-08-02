@@ -1,11 +1,14 @@
-var tabFiller = "	";
+var enabled = true;
 
-chrome.extension.sendRequest("options", function(response) {
-	tabFiller = response.tab_filler;
-});
+//default options
+var options = {
+	tab_filler : "	",
+	space_cnt : 4,
+	default_state : "enabled",
+	icon : "focus"
+};
 
-	
-$("textarea").live("keydown", function(event) {
+function textareaFormatter(event) {
 	
 	var textarea = $(this).get(0);
 	var selStart = textarea.selectionStart;
@@ -20,9 +23,9 @@ $("textarea").live("keydown", function(event) {
 			//no selection
 			if(selStart == selEnd) {
 				
-				textarea.value = textarea.value.substring(0, textarea.selectionStart) + tabFiller + textarea.value.substring(textarea.selectionStart, textarea.value.length);
-				textarea.selectionStart = selStart + tabFiller.length;
-				textarea.selectionEnd = selEnd + tabFiller.length;
+				textarea.value = textarea.value.substring(0, textarea.selectionStart) + options.tab_filler + textarea.value.substring(textarea.selectionStart, textarea.value.length);
+				textarea.selectionStart = selStart + options.tab_filler.length;
+				textarea.selectionEnd = selEnd + options.tab_filler.length;
 			} else {
 				//block selected
 				
@@ -33,12 +36,12 @@ $("textarea").live("keydown", function(event) {
 				
 				//insert tabs
 				var tabInserts = tabbedBlock.match(/\n/g) != null ? tabbedBlock.match(/\n/g).length + 1 : 1;
-				tabbedBlock = tabFiller + tabbedBlock.replace(/\n/g,"\n" + tabFiller);
+				tabbedBlock = options.tab_filler + tabbedBlock.replace(/\n/g,"\n" + options.tab_filler);
 				
 				//put block back
 				textarea.value = textarea.value.substring(0, firstLinePos) + tabbedBlock + textarea.value.substring(selEnd, textarea.value.length);
-				textarea.selectionStart = selStart + tabFiller.length;
-				textarea.selectionEnd = selEnd + tabInserts * tabFiller.length;
+				textarea.selectionStart = selStart + options.tab_filler.length;
+				textarea.selectionEnd = selEnd + tabInserts * options.tab_filler.length;
 			}
 		} else {
 			//left shift
@@ -48,11 +51,11 @@ $("textarea").live("keydown", function(event) {
 			
 			var tabbedBlock = textarea.value.substring(firstLinePos, selEnd);
 			
-			var fillerPattern = new RegExp("\n"+tabFiller, "g");
+			var fillerPattern = new RegExp("\n"+options.tab_filler, "g");
 			
 			//proceed if block starts with tab filler
-			if(tabbedBlock.indexOf(tabFiller) == 0) {
-				tabbedBlock = tabbedBlock.substring(tabFiller.length);
+			if(tabbedBlock.indexOf(options.tab_filler) == 0) {
+				tabbedBlock = tabbedBlock.substring(options.tab_filler.length);
 				
 				//count tab removes
 				var tabRemoves = tabbedBlock.match(fillerPattern) != null ? tabbedBlock.match(fillerPattern).length + 1: 1;
@@ -62,8 +65,8 @@ $("textarea").live("keydown", function(event) {
 				
 				//put block back
 				textarea.value = textarea.value.substring(0, firstLinePos) + tabbedBlock + textarea.value.substring(selEnd, textarea.value.length);
-				textarea.selectionStart = selStart - tabFiller.length;
-				textarea.selectionEnd = selEnd - tabRemoves * tabFiller.length;
+				textarea.selectionStart = selStart - options.tab_filler.length;
+				textarea.selectionEnd = selEnd - tabRemoves * options.tab_filler.length;
 			}
 		}
 		return false;
@@ -86,7 +89,7 @@ $("textarea").live("keydown", function(event) {
 			
 			//check for open brackets
 			if(selLine.match(/[\{\[\(]\s*$/) != null) {
-				newLineFiller += tabFiller;
+				newLineFiller += options.tab_filler;
 			}
 			
 			textarea.value = textarea.value.substring(0, selStart) + "\n" + newLineFiller + textarea.value.substring(selEnd, textarea.value.length);
@@ -98,13 +101,48 @@ $("textarea").live("keydown", function(event) {
 		//backspace
 		
 		//no selection and tabfiller is found before cursor
-		if(selStart == selEnd && selStart > tabFiller.length && textarea.value.substring(selStart - tabFiller.length, selStart) == tabFiller) {
-			textarea.value = textarea.value.substring(0, selStart - tabFiller.length) + textarea.value.substring(selEnd, textarea.value.length);
-			textarea.selectionStart = selStart - tabFiller.length;
+		if(selStart == selEnd && selStart > options.tab_filler.length && textarea.value.substring(selStart - options.tab_filler.length, selStart) == options.tab_filler) {
+			textarea.value = textarea.value.substring(0, selStart - options.tab_filler.length) + textarea.value.substring(selEnd, textarea.value.length);
+			textarea.selectionStart = selStart - options.tab_filler.length;
 			textarea.selectionEnd = textarea.selectionStart;
 			return false;
 		}
 		
 	}
-});
+}
+
+function toggleState() {
+	enabled = !enabled;
+	if(enabled) {
+		$("textarea").live("keydown", textareaFormatter);
+	} else {
+		$("textarea").die("keydown");
+	}
+}
 		
+chrome.extension.sendRequest({"cmd":"options"}, function(response) {
+	options = response;
+	
+	if(options.default_state == "enabled") {
+		$("textarea").live("keydown", textareaFormatter);
+		enabled = true;
+	} else {
+		enabled = false; 
+	}
+	
+	if(options.icon == "focus") {
+		$("textarea").live("focus", function(event) {
+			chrome.extension.sendRequest({"cmd":"show_icon","enabled":enabled});
+		});
+	} else if(options.icon == "show") {
+		chrome.extension.sendRequest({"cmd":"show_icon","enabled":enabled});
+	} 
+	
+});
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+	if(request == "toggle_state") {
+		toggleState();
+		sendResponse({"enabled":enabled});
+	}
+}); 
