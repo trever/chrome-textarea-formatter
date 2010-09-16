@@ -16,6 +16,7 @@ function textareaFormatter(event) {
 	var scrollTop = textarea.scrollTop;
 	var scrollLeft = textarea.scrollLeft;
 	
+	
 	//tab key
 	if(event.which == 9) {
 		
@@ -52,11 +53,19 @@ function textareaFormatter(event) {
 			
 			var tabbedBlock = textarea.value.substring(firstLinePos, selEnd);
 			
-			var fillerPattern = new RegExp("\n"+options.tab_filler, "g");
 			
-			//proceed if block starts with tab filler
-			if(tabbedBlock.indexOf(options.tab_filler) == 0) {
-				tabbedBlock = tabbedBlock.substring(options.tab_filler.length);
+			//shift block if it starts with filler or space
+			if(tabbedBlock.indexOf(options.tab_filler) == 0 || tabbedBlock.search(/\s/) == 0) {
+				var filler = options.tab_filler;
+				var fillerPattern = new RegExp("\n"+options.tab_filler, "g");
+				
+				//no filler but space
+				if(tabbedBlock.indexOf(options.tab_filler) != 0) {
+					filler = " ";
+					fillerPattern = new RegExp("\n\\s", "g");
+				}
+			
+				tabbedBlock = tabbedBlock.substring(filler.length);
 				
 				//count tab removes
 				var tabRemoves = tabbedBlock.match(fillerPattern) != null ? tabbedBlock.match(fillerPattern).length + 1: 1;
@@ -66,9 +75,10 @@ function textareaFormatter(event) {
 				
 				//put block back
 				textarea.value = textarea.value.substring(0, firstLinePos) + tabbedBlock + textarea.value.substring(selEnd, textarea.value.length);
-				textarea.selectionStart = selStart - options.tab_filler.length;
-				textarea.selectionEnd = selEnd - tabRemoves * options.tab_filler.length;
+				textarea.selectionStart = selStart - filler.length;
+				textarea.selectionEnd = selEnd - tabRemoves * filler.length;
 			}
+			
 		}
 		
 		//lock scrolling
@@ -336,6 +346,78 @@ function textareaFormatter(event) {
 		textarea.scrollLeft = scrollLeft;
 		
 		return false;
+		
+	} else if(event.which == 36 && !event.ctrlKey && !event.altKey && !event.shiftKey){
+		//home
+		
+		//select current line
+		var firstLinePos = textarea.value.substring(0,selEnd).lastIndexOf("\n") + 1;
+		var lastLinePos = textarea.value.substring(selEnd, textarea.value.length).indexOf("\n");
+		
+		if(lastLinePos == -1) {
+			lastLinePos = textarea.value.length;
+		} else {
+			lastLinePos += selEnd + 1;
+		}
+		
+		var line = textarea.value.substring(firstLinePos, lastLinePos);
+		
+		//find first non empty char
+		var firstChar = line.search(/\S/);
+		
+		
+		//if cursor is not at this position already, otherwise default behavior
+		if(firstChar!= -1 && firstLinePos + firstChar != selStart) {
+		
+			textarea.selectionEnd = firstLinePos + firstChar;
+			textarea.selectionStart = textarea.selectionEnd;
+			
+			//fix scrolling
+			textarea.scrollTop = scrollTop;
+			textarea.scrollLeft = scrollLeft;
+			
+			return false;
+		}
+		
+	} else if(event.which == 36 && event.shiftKey && !event.ctrlKey && !event.altKey ){
+		//shift+home and no selection
+		
+		//select current line
+		var firstLinePos = textarea.value.substring(0,selStart).lastIndexOf("\n") + 1;
+		var lastLinePos = textarea.value.substring(selEnd, textarea.value.length).indexOf("\n");
+		
+		if(lastLinePos == -1) {
+			lastLinePos = textarea.value.length;
+		} else {
+			lastLinePos += selEnd + 1;
+		}
+		
+		var line = textarea.value.substring(firstLinePos, lastLinePos);
+		
+		//only if no multiline selection
+		if(line.indexOf("\n") == line.lastIndexOf("\n")) {
+		
+			//find first non empty char
+			var firstChar = line.search(/\S/);
+			
+			
+			//if cursor is not at this position already
+			if(firstChar!= -1) {
+				if(firstLinePos + firstChar != selStart) {
+					textarea.selectionStart = firstLinePos + firstChar;
+					textarea.selectionEnd = selEnd;
+				} else {
+					textarea.selectionStart = firstLinePos;
+					textarea.selectionEnd = selEnd;
+				}
+				
+				//fix scrolling
+				textarea.scrollTop = scrollTop;
+				textarea.scrollLeft = scrollLeft;
+				
+				return false;
+			}
+		}
 	}
 }
 
