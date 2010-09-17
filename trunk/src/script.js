@@ -347,7 +347,9 @@ function textareaFormatter(event) {
 		
 		return false;
 		
-	} else if(event.which == 36 && !event.ctrlKey && !event.altKey && !event.shiftKey){
+	} 
+	/*
+	else if(event.which == 36 && !event.ctrlKey && !event.altKey && !event.shiftKey){
 		//home
 		
 		//select current line
@@ -419,6 +421,7 @@ function textareaFormatter(event) {
 			}
 		}
 	}
+	*/
 }
 
 function toggleState() {
