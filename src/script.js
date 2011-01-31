@@ -31,19 +31,28 @@ function textareaFormatter(event) {
 			} else {
 				//block selected
 				
-				//find first line
-				var firstLinePos = textarea.value.substring(0,selStart).lastIndexOf("\n") + 1;
+				//if selected spaces only on 1 line then replace them with a tab instead of shifting
+				if(!textarea.value.substring(selStart,selEnd).match(/\n/) && textarea.value.substring(selStart,selEnd).match(/^\s+$/)) {
+					textarea.value = textarea.value.substring(0, selStart) + options.tab_filler + textarea.value.substring(selEnd, textarea.value.length);
+					textarea.selectionStart = selStart + options.tab_filler.length;
+					textarea.selectionEnd = textarea.selectionStart;
+				} else {
 				
-				var tabbedBlock = textarea.value.substring(firstLinePos, selEnd);
+					//find first line
+					var firstLinePos = textarea.value.substring(0,selStart).lastIndexOf("\n") + 1;
+					
+					var tabbedBlock = textarea.value.substring(firstLinePos, selEnd);
+					
+					//insert tabs
+					var tabInserts = tabbedBlock.match(/\n/g) != null ? tabbedBlock.match(/\n/g).length + 1 : 1;
+					tabbedBlock = options.tab_filler + tabbedBlock.replace(/\n/g,"\n" + options.tab_filler);
+					
+					//put block back
+					textarea.value = textarea.value.substring(0, firstLinePos) + tabbedBlock + textarea.value.substring(selEnd, textarea.value.length);
+					textarea.selectionStart = selStart + options.tab_filler.length;
+					textarea.selectionEnd = selEnd + tabInserts * options.tab_filler.length;
 				
-				//insert tabs
-				var tabInserts = tabbedBlock.match(/\n/g) != null ? tabbedBlock.match(/\n/g).length + 1 : 1;
-				tabbedBlock = options.tab_filler + tabbedBlock.replace(/\n/g,"\n" + options.tab_filler);
-				
-				//put block back
-				textarea.value = textarea.value.substring(0, firstLinePos) + tabbedBlock + textarea.value.substring(selEnd, textarea.value.length);
-				textarea.selectionStart = selStart + options.tab_filler.length;
-				textarea.selectionEnd = selEnd + tabInserts * options.tab_filler.length;
+				}
 			}
 		} else {
 			//left shift
